@@ -6,3 +6,7 @@ type User struct {
 	Email    string
 	Password string
 }
+
+func (u *User) SetEncryptedPassword(encryptedPassword string) {
+	u.Password = encryptedPassword
+}

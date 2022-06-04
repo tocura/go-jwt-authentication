@@ -8,6 +8,7 @@ import (
 	"github.com/tocura/go-jwt-authentication/core/port"
 	"github.com/tocura/go-jwt-authentication/pkg/log"
 	"github.com/tocura/go-jwt-authentication/pkg/web"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type userService struct {
@@ -26,6 +27,14 @@ func (us *userService) Create(ctx context.Context, user model.User) (*model.User
 		log.Warn(ctx, "email already exists in database")
 		return nil, web.NewError(http.StatusConflict, "Email already in use")
 	}
+
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	if err != nil {
+		log.Error(ctx, "error to encrypt password", err)
+		return nil, web.NewError(http.StatusInternalServerError, "Error to create user")
+	}
+
+	user.SetEncryptedPassword(string(encryptedPassword))
 
 	newUser, err := us.repo.Create(ctx, user)
 	if err != nil {
