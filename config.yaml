@@ -1,0 +1,11 @@
+app:
+  scope: dev
+  address: 0.0.0.0:8080
+  
+database:
+  mysql:
+    hostname: 127.0.0.1
+    port: 3306
+    name: users
+    username: root
+    password: users
