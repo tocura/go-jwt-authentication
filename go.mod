@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/google/uuid v1.3.0
 	go.uber.org/zap v1.21.0
+	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.3.4
 	gorm.io/gorm v1.23.5
