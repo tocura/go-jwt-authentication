@@ -5,6 +5,8 @@ services:
     image: mysql:latest
     container_name: mysql_db
     restart: always
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
     environment:
       MYSQL_ROOT_PASSWORD: "users"
       MYSQL_DATABASE: "users"
