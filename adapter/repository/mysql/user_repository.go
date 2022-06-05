@@ -40,24 +40,6 @@ func (u *userRepository) Create(ctx context.Context, user model.User) (*model.Us
 	return userEntity.MapToUserModel(), nil
 }
 
-func (u *userRepository) Login(ctx context.Context, login model.Login) (*model.User, error) {
-	loginEntity := entity.MapToLoginEntity(login)
-	var userEntity entity.User
-
-	result := u.db.WithContext(ctx).
-		Table(usersTable).
-		Where("email = ? AND password = ?", loginEntity.Email, login.Password).
-		First(&userEntity)
-
-	if result.Error != nil {
-		log.Error(ctx, "user not find", result.Error)
-		return nil, result.Error
-	}
-
-	log.Info(ctx, "user credentials retrieved from database with success")
-	return userEntity.MapToUserModel(), nil
-}
-
 func (u *userRepository) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	var userEntity entity.User
 
