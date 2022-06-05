@@ -30,6 +30,7 @@ func (h *userHandler) SignUp(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&signup); err != nil {
 		log.Error(r.Context(), "invalid request body", err)
 		responseError(w, web.NewError(http.StatusBadRequest, err.Error()))
+		return
 	}
 
 	signupDomain := signup.MapToUserDomain()
@@ -50,6 +51,7 @@ func (h *userHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewDecoder(r.Body).Decode(&signin); err != nil {
 		log.Error(r.Context(), "invalid request body", err)
 		responseError(w, web.NewError(http.StatusBadRequest, err.Error()))
+		return
 	}
 
 	signinDomain := signin.MapToLoginDomain()
