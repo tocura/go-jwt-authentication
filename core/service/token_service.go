@@ -50,7 +50,7 @@ func (ts *tokenService) GenerateJWT(ctx context.Context, email, role string) (st
 	claims["role"] = role
 	claims["exp"] = time.Now().Add(time.Minute * 30).Unix()
 
-	tokenString, err := token.SignedString(key)
+	tokenString, err := token.SignedString([]byte(key))
 	if err != nil {
 		log.Error(ctx, "error to generate jwt token", err)
 		return "", err

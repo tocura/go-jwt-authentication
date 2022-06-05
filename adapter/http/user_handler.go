@@ -22,7 +22,7 @@ func newUserHandler(router chi.Router, userService port.UserService) {
 	}
 
 	router.Post("/signup", handler.SignUp)
-	router.Get("/signin", handler.SignIn)
+	router.Post("/signin", handler.SignIn)
 }
 
 func (h *userHandler) SignUp(w http.ResponseWriter, r *http.Request) {
