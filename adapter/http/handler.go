@@ -12,6 +12,7 @@ import (
 func NewHandler(router *chi.Mux, userService port.UserService) {
 	router.Route("/api/v1", func(r chi.Router) {
 		newUserHandler(r, userService)
+		newProtectedHandler(r)
 	})
 }
 
