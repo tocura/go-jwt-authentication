@@ -8,16 +8,24 @@ import (
 	"github.com/tocura/go-jwt-authentication/core/port"
 	"github.com/tocura/go-jwt-authentication/pkg/log"
 	"github.com/tocura/go-jwt-authentication/pkg/web"
-	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	errorInvalidCredentials = web.NewError(http.StatusNotFound, "Email and/or password are invalid")
+	errorEmailAlreadyInUse  = web.NewError(http.StatusConflict, "Email already in use")
+	errorCreateUser         = web.NewError(http.StatusInternalServerError, "Error to create user")
+	errorGenerateJWT        = web.NewError(http.StatusInternalServerError, "Error to generate token")
 )
 
 type userService struct {
-	repo port.UserRepository
+	repo  port.UserRepository
+	token port.TokenService
 }
 
-func NewUserService(repo port.UserRepository) port.UserService {
+func NewUserService(repo port.UserRepository, token port.TokenService) port.UserService {
 	return &userService{
-		repo: repo,
+		repo:  repo,
+		token: token,
 	}
 }
 
@@ -25,30 +33,40 @@ func (us *userService) Create(ctx context.Context, user model.User) (*model.User
 	usr, _ := us.repo.GetByEmail(ctx, user.Email)
 	if usr != nil {
 		log.Warn(ctx, "email already exists in database")
-		return nil, web.NewError(http.StatusConflict, "Email already in use")
+		return nil, errorEmailAlreadyInUse
 	}
 
-	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 10)
+	encryptedPassword, err := us.token.GenerateHashPassword(ctx, user.Password)
 	if err != nil {
 		log.Error(ctx, "error to encrypt password", err)
-		return nil, web.NewError(http.StatusInternalServerError, "Error to create user")
+		return nil, errorCreateUser
 	}
 
 	user.SetEncryptedPassword(string(encryptedPassword))
 
 	newUser, err := us.repo.Create(ctx, user)
 	if err != nil {
-		return nil, web.NewError(http.StatusInternalServerError, "Error to create user")
+		return nil, errorCreateUser
 	}
 
 	return newUser, nil
 }
 
-func (us *userService) Login(ctx context.Context, login model.Login) (*model.User, error) {
-	user, err := us.repo.Login(ctx, login)
+func (us *userService) Login(ctx context.Context, login model.Login) (string, error) {
+	user, err := us.repo.GetByEmail(ctx, login.Email)
 	if err != nil {
-		return nil, web.NewError(http.StatusNotFound, "Email and/or password are invalid")
+		return "", errorInvalidCredentials
 	}
 
-	return user, nil
+	if !us.token.IsValidPassword(ctx, user.Password, login.Password) {
+		log.Warn(ctx, "invalid login credentials")
+		return "", errorInvalidCredentials
+	}
+
+	token, err := us.token.GenerateJWT(ctx, user.Email, string(user.Role))
+	if err != nil {
+		return "", errorGenerateJWT
+	}
+
+	return token, nil
 }
