@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tocura/go-jwt-authentication/core/enum"
 	"github.com/tocura/go-jwt-authentication/core/model"
 )
 
@@ -12,6 +13,7 @@ type User struct {
 	Name      string    `gorm:"type:string;not null" json:"name"`
 	Email     string    `gorm:"type:string;not null" json:"email"`
 	Password  string    `gorm:"type:string;not null" json:"password"`
+	Role      string    `gorm:"type:string;not null" json:"role"`
 	CreatedAt time.Time `gorm:"type:time;not null" json:"created_at"`
 	UpdatedAt time.Time `gorm:"type:time" json:"updated_at"`
 }
@@ -22,6 +24,7 @@ func (u *User) MapToUserModel() *model.User {
 		Name:     u.Name,
 		Email:    u.Email,
 		Password: u.Password,
+		Role:     enum.EnumRole(u.Role),
 	}
 }
 
@@ -31,6 +34,7 @@ func MapToUserEntity(user model.User) *User {
 		Name:     user.Name,
 		Email:    user.Email,
 		Password: user.Password,
+		Role:     string(user.Role),
 	}
 }
 
